@@ -1,0 +1,40 @@
+#!/opt/perl/bin/perl
+
+use 5.028;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+
+use experimental 'signatures';
+use experimental 'lexical_subs';
+
+my $input = "input";
+open my $fh, "<", $input or die "Failed to open $input: $!";
+my @steps = <$fh>;
+chomp (@steps);
+
+#
+# Part 1
+#
+my  $frequency = 0;
+    $frequency += $_ for @steps;
+say "Part 1: $frequency";
+
+#
+# Part 2
+#
+$frequency = 0;
+my %seen = ($frequency => 1);
+while (1) {
+    foreach my $step (@steps) {
+        $frequency += $step;
+        if ($seen {$frequency} ++) {
+            say "Part 2: $frequency";
+            exit;
+        }
+    }
+}
+
+
+__END__
