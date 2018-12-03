@@ -1,0 +1,51 @@
+#!/opt/perl/bin/perl
+
+use 5.028;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+
+use experimental 'signatures';
+use experimental 'lexical_subs';
+
+my $input = "input";
+open my $fh, "<", $input or die "Failed to open: $!";
+my @ids = <$fh>;
+chomp @ids;
+
+my $count_2 = 0;
+my $count_3 = 0;
+
+foreach my $id (@ids) {
+    my %count;
+    $count {$_} ++ for split // => $id;
+    $count_2 ++ if grep {$_ == 2} values %count;
+    $count_3 ++ if grep {$_ == 3} values %count;
+}
+
+say "Part 1: ", $count_2 * $count_3;
+
+
+for (my $i = 0; $i < @ids; $i ++) {
+    my $id1 = $ids [$i];
+    for (my $j = $i + 1; $j < @ids; $j ++) {
+        my $id2 = $ids [$j];
+
+        #
+        # If we use bitwise XOR between two strings, then for
+        # each position in the two strings, if the character is
+        # the same, the result is NUL (\x00), else, the result
+        # is not NUL.
+        #
+        my $diff = $id1 ^. $id2;
+        if ($diff =~ /^(\x00*)[^\x00]\x00*$/) {
+            substr $id1, length ($1), 1, "";
+            say "Part 2: $id1";
+            exit;
+        }
+    }
+}
+
+
+__END__
