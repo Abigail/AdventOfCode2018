@@ -1,0 +1,61 @@
+#!/opt/perl/bin/perl
+
+use 5.026;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+
+use experimental 'signatures';
+
+
+my $input = "input";
+open my $fh, "<", $input or die "Failed to open $input: $!";
+
+
+#
+# Parse the input and store the relevant pieces in an array.
+# We're assuming all the lines of the input validate.
+#
+my @fabric = map {[/^\#([0-9]+) \s+  \@      \s+
+                       ([0-9]+) , ([0-9]+) : \s+
+                       ([0-9]+) x ([0-9]+)   \s* $/x]} <$fh>;
+
+my %seen;         # Count the number of pieces of fabric competing
+                  # for position (x, y).
+my $overlap = 0;  # Counts overlapping claims.
+foreach my $fabric (@fabric) {
+    my ($id, $offset_x, $offset_y, $width, $height) = @$fabric;
+    foreach my $x ($offset_x .. ($offset_x + $width - 1)) {
+        foreach my $y ($offset_y .. ($offset_y + $height - 1)) {
+            #
+            # Should only count the first time there is a conflict
+            # for a particular square. That is, count it if it has
+            # only be seen once before. (0: no conflict so far, 
+            # > 1: already counted).
+            #
+            $overlap ++ if 1 == $seen {$x} {$y} ++;
+        }
+    }
+}
+
+say "Part 1: $overlap";
+
+#
+# Find the piece of fabric with no overlapping claims: for that to
+# happen, each of its (x, y) positions should be seen once; if not,
+# we will inspect the next piece of fabric.
+#
+FABRIC:
+  foreach my $fabric (@fabric) {
+    my ($id, $offset_x, $offset_y, $width, $height) = @$fabric;
+    foreach my $x ($offset_x .. ($offset_x + $width - 1)) {
+        foreach my $y ($offset_y .. ($offset_y + $height - 1)) {
+            next FABRIC if $seen {$x} {$y} > 1;
+        }
+    }
+    say "Part 2: $id";
+    exit;
+}
+
+__END__
