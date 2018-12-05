@@ -1,0 +1,42 @@
+#!/opt/perl/bin/perl
+
+use 5.026;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+
+use experimental 'signatures';
+
+my $input = "input";
+open my $fh, "<", $input or die "Failed to open $input: $!";
+my $text = <$fh>;
+$text =~ s/\n+//g;
+
+#
+# Repeatedly remove 'Aa' / 'aA' units.
+#
+sub react ($text) {
+    state $pat = join "|" => map {"$_\u$_|\u$_$_"} 'a' .. 'z';
+    1 while $text =~ s/$pat//g;
+    $text;
+}
+
+say "Part 1: ", length react $text;
+
+my $shortest = length $text;
+#
+# Foreach letter, remove it (either case), and perform the reaction.
+# Remember the shortest result.
+#
+foreach my $unit ('a' .. 'z') {
+    my $cleaned = $text =~ s/$unit//gir;
+    my $length  = length react $cleaned;
+    if ($length < $shortest) {
+        $shortest = $length;
+    }
+}
+
+say "Part 2: ", $shortest;
+
+__END__
