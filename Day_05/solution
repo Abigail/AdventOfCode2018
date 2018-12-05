@@ -10,28 +10,29 @@ use experimental 'signatures';
 
 my $input = "input";
 open my $fh, "<", $input or die "Failed to open $input: $!";
-my $text = <$fh>;
-$text =~ s/\n+//g;
+my $polymer = <$fh>;
+$polymer =~ s/\n+//g;
 
 #
 # Repeatedly remove 'Aa' / 'aA' units.
 #
-sub react ($text) {
+sub react ($polymer) {
     state $pat = join "|" => map {"$_\u$_|\u$_$_"} 'a' .. 'z';
-    1 while $text =~ s/$pat//g;
-    $text;
+    1 while $polymer =~ s/$pat//g;
+    $polymer;
 }
 
-say "Part 1: ", length react $text;
+my $reduced_polymer = react $polymer;
+say "Part 1: ", length react $reduced_polymer;
 
-my $shortest = length $text;
+my $shortest = length $reduced_polymer;
 #
 # Foreach letter, remove it (either case), and perform the reaction.
 # Remember the shortest result.
 #
 foreach my $unit ('a' .. 'z') {
-    my $cleaned = $text =~ s/$unit//gir;
-    my $length  = length react $cleaned;
+    my $cleaned_polymer = $reduced_polymer =~ s/$unit//gir;
+    my $length  = length react $cleaned_polymer;
     if ($length < $shortest) {
         $shortest = $length;
     }
