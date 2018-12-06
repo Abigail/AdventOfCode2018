@@ -1,0 +1,95 @@
+#!/opt/perl/bin/perl
+
+use 5.026;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+use List::Util qw [max sum];
+
+use experimental 'signatures';
+
+#
+# Read the input and map them to points.
+#
+my $input = "input";
+open my $fh, "<", $input or die "Failed to open $input: $!";
+my @points = map {[/^(\d+), \s+ (\d+)$/gax]} <$fh>;
+
+#
+# Find the max X and max Y coordinates
+#
+my $max_X = max map {$$_ [0]} @points;
+my $max_Y = max map {$$_ [1]} @points;
+
+my $MIN_UNSAFE_DISTANCE = 10_000;
+
+my $board = [];
+my $safe_region_count = 0;
+
+#
+# We could this do more efficiently by just filling the board from
+# each of the points, but for part 2, we need all the distances anyway.
+#
+foreach my $x (0 .. $max_X) {
+    foreach my $y (0 .. $max_Y) {
+        #
+        # For each point on the board, calculate the distance
+        # to each point; find the smallest distance, and mark
+        # the point; if a tie, there is no score.
+        #
+        my @distances =
+            sort {$$a [1] <=> $$b [1]}
+            map  {[$_, abs ($points [$_] [0] - $x) +
+                       abs ($points [$_] [1] - $y)]}
+            keys @points;
+        if ($distances [0] [1] == $distances [1] [1]) {
+            #
+            # Tie
+            #
+            $$board [$x] [$y] = ".";
+        }
+        else {
+            $$board [$x] [$y] = $distances [0] [0];
+        }
+        my $sum_of_distances = sum map {$$_ [1]} @distances;
+        $safe_region_count ++ if $sum_of_distances < $MIN_UNSAFE_DISTANCE;
+    }
+}
+
+#
+# Scan the edges of the board. Any cluster which hits the
+# edge, tapers off to infinity and must be ignored. We'll
+# eliminate them in a second pass.
+#
+my %ignore;
+foreach my $x (0, $max_X) {
+    foreach my $y (0 .. $max_Y) {
+        $ignore {$$board [$x] [$y]} = 1;
+    }
+}
+foreach my $x (0 .. $max_X) {
+    foreach my $y (0, $max_Y) {
+        $ignore {$$board [$x] [$y]} = 1;
+    }
+}
+
+foreach my $x (0 .. $max_X) {
+    foreach my $y (0 .. $max_Y) {
+        $$board [$x] [$y] = "." if $ignore {$$board [$x] [$y]};
+    }
+}
+
+#
+# Now, lets count what is left over.
+#
+my %count;
+foreach my $row (@$board) {
+    foreach my $cell (@$row) {
+        $count {$cell} ++;
+    }
+}
+delete $count {"."};
+
+say "Part 1: ", max values %count;
+say "Part 2: ", $safe_region_count;
