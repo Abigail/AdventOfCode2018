@@ -5,7 +5,7 @@ use 5.026;
 use strict;
 use warnings;
 no  warnings 'syntax';
-use List::Util qw [max sum];
+use List::Util qw [min max sum];
 
 use experimental 'signatures';
 
@@ -17,10 +17,14 @@ open my $fh, "<", $input or die "Failed to open $input: $!";
 my @points = map {[/^(\d+), \s+ (\d+)$/gax]} <$fh>;
 
 #
-# Find the max X and max Y coordinates
+# Find the min/max X and Y coordinates
 #
+my $min_X = min map {$$_ [0]} @points;
+my $min_Y = min map {$$_ [1]} @points;
 my $max_X = max map {$$_ [0]} @points;
 my $max_Y = max map {$$_ [1]} @points;
+my @X = ($min_X .. $max_X);
+my @Y = ($min_Y .. $max_Y);
 
 my $MIN_UNSAFE_DISTANCE = 10_000;
 
@@ -31,8 +35,8 @@ my $safe_region_count = 0;
 # We could this do more efficiently by just filling the board from
 # each of the points, but for part 2, we need all the distances anyway.
 #
-foreach my $x (0 .. $max_X) {
-    foreach my $y (0 .. $max_Y) {
+foreach my $x (@X) {
+    foreach my $y (@Y) {
         #
         # For each point on the board, calculate the distance
         # to each point; find the smallest distance, and mark
@@ -63,19 +67,19 @@ foreach my $x (0 .. $max_X) {
 # eliminate them in a second pass.
 #
 my %ignore;
-foreach my $x (0, $max_X) {
-    foreach my $y (0 .. $max_Y) {
+foreach my $x (@X [0, -1]) {
+    foreach my $y (@Y) {
         $ignore {$$board [$x] [$y]} = 1;
     }
 }
-foreach my $x (0 .. $max_X) {
-    foreach my $y (0, $max_Y) {
+foreach my $x (@X) {
+    foreach my $y (@Y [0, -1]) {
         $ignore {$$board [$x] [$y]} = 1;
     }
 }
 
-foreach my $x (0 .. $max_X) {
-    foreach my $y (0 .. $max_Y) {
+foreach my $x (@X) {
+    foreach my $y (@Y) {
         $$board [$x] [$y] = "." if $ignore {$$board [$x] [$y]};
     }
 }
@@ -84,12 +88,14 @@ foreach my $x (0 .. $max_X) {
 # Now, lets count what is left over.
 #
 my %count;
-foreach my $row (@$board) {
-    foreach my $cell (@$row) {
-        $count {$cell} ++;
+foreach my $x ($min_X .. $max_X) {
+    foreach my $y ($min_Y .. $max_Y) {
+        $count {$$board [$x] [$y]} ++;
     }
 }
 delete $count {"."};
 
 say "Part 1: ", max values %count;
 say "Part 2: ", $safe_region_count;
+
+__END__
