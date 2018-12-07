@@ -1,0 +1,54 @@
+   0: Elf 1 starts working on J
+   0: Elf 2 starts working on M
+   0: Elf 3 starts working on Z
+  70: Elf 1 finished working on J
+  73: Elf 2 finished working on M
+  73: Elf 4 starts working on Q
+  86: Elf 3 finished working on Z
+  86: Elf 5 starts working on E
+  86: Elf 1 starts working on L
+  86: Elf 2 starts working on V
+  86: Elf 3 starts working on Y
+ 150: Elf 4 finished working on Q
+ 151: Elf 5 finished working on E
+ 158: Elf 1 finished working on L
+ 168: Elf 2 finished working on V
+ 171: Elf 3 finished working on Y
+ 171: Elf 4 starts working on X
+ 255: Elf 4 finished working on X
+ 255: Elf 5 starts working on T
+ 335: Elf 5 finished working on T
+ 335: Elf 1 starts working on I
+ 404: Elf 1 finished working on I
+ 404: Elf 2 starts working on G
+ 404: Elf 3 starts working on P
+ 471: Elf 2 finished working on G
+ 480: Elf 3 finished working on P
+ 480: Elf 4 starts working on H
+ 480: Elf 5 starts working on N
+ 548: Elf 4 finished working on H
+ 548: Elf 1 starts working on F
+ 548: Elf 2 starts working on S
+ 554: Elf 5 finished working on N
+ 614: Elf 1 finished working on F
+ 627: Elf 2 finished working on S
+ 627: Elf 3 starts working on O
+ 702: Elf 3 finished working on O
+ 702: Elf 4 starts working on A
+ 702: Elf 5 starts working on D
+ 763: Elf 4 finished working on A
+ 766: Elf 5 finished working on D
+ 766: Elf 1 starts working on K
+ 766: Elf 2 starts working on W
+ 837: Elf 1 finished working on K
+ 849: Elf 2 finished working on W
+ 849: Elf 3 starts working on B
+ 911: Elf 3 finished working on B
+ 911: Elf 4 starts working on R
+ 989: Elf 4 finished working on R
+ 989: Elf 5 starts working on U
+1070: Elf 5 finished working on U
+1070: Elf 1 starts working on C
+1133: Elf 1 finished working on C
+Time to finish: 1133s
+
