@@ -8,14 +8,14 @@ no  warnings 'syntax';
 
 use experimental 'signatures';
 
+my $BASE_TIME = 60;
+my $ELVES     =  5;
+
 #
-# Read the input and map them to points.
+# Read the input
 #
 my $input = "input";
 open my $fh, "<", $input or die "Failed to open $input: $!";
-
-my $BASE_TIME = 60;
-my $ELVES     =  5;
 
 my %dependencies;
 
