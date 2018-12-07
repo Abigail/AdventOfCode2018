@@ -1,0 +1,53 @@
+#!/opt/perl/bin/perl
+
+use 5.026;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+
+use experimental 'signatures';
+
+#
+# Read the input and map them to points.
+#
+my $input = "input";
+open my $fh, "<", $input or die "Failed to open $input: $!";
+
+my %dependencies;
+
+while (<$fh>) {
+    /^Step (?<requirement>\p{Lu}) must be finished before (?#
+      )step (?<target>\p{Lu}) can begin\.$/ or die "Failed to parse $_";
+
+    $dependencies {$+ {target}} {$+ {requirement}} ++;
+    $dependencies {$+ {requirement}} ||= {};
+}
+
+my @order;
+
+while (%dependencies) {
+    #
+    # Find the item which should be processed. For all items which
+    # have no dependencies left, pick the first in alphabetical order.
+    #
+    my ($todo) = sort grep {!keys %{$dependencies {$_}}} keys %dependencies;
+
+    #
+    # Process them
+    #
+    push @order => $todo;
+
+    #
+    # Remove it from the list.
+    #
+    delete $dependencies {$todo};
+
+    #
+    # Since it's done, remove it as requirements for other items.
+    #
+    delete $dependencies {$_} {$todo} for keys %dependencies;
+}
+
+
+say @order;
