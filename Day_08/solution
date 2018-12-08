@@ -1,0 +1,67 @@
+#!/opt/perl/bin/perl
+
+use 5.026;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+use List::Util 'sum';
+
+use experimental 'signatures';
+
+#
+# Read the input
+#
+my $input = "input";
+open my $fh, "<", $input or die "Failed to open $input: $!";
+my $numbers = [map {split ' '} <$fh>]; 
+
+sub read_tree;
+
+my $META     = 0;
+my $CHILDREN = 1;
+
+#
+# Recursively read the tree.
+#
+sub read_tree ($numbers) {
+    my $nr_of_child_nodes = shift @$numbers;
+    my $nr_of_meta_data   = shift @$numbers;
+
+    my $node = [[], []];
+
+    foreach (1 .. $nr_of_child_nodes) {
+        push @{$$node [$CHILDREN]} => read_tree $numbers;
+    }
+
+    $$node [$META] = [splice @$numbers, 0, $nr_of_meta_data];
+
+    $node;
+}
+
+#
+# Sum the meta data: sum the meta data of the node; add to that
+# the sums of the meta data of each child (if any).
+#
+sub sum_meta;
+sub sum_meta ($tree) {
+    sum @{$$tree [$META]}, map {sum_meta $_} @{$$tree [$CHILDREN]};
+}
+
+#
+# Recurse through the tree, and calculate the value
+#
+sub tree_value;
+sub tree_value ($tree) {
+    sum @{$$tree [$CHILDREN]} ? map  {tree_value $$tree [$CHILDREN] [$_ - 1]}
+                                grep {$_ <= @{$$tree [$CHILDREN]}}
+                                    @{$$tree [$META]}
+                              : @{$$tree [$META]};
+}
+
+my $tree = read_tree $numbers;
+
+say "Part 1: ", sum_meta $tree;
+say "Part 2: ", tree_value $tree;
+
+__END__
