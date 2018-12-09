@@ -1,0 +1,67 @@
+#!/opt/perl/bin/perl
+
+use 5.028;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+use List::Util 'max';
+
+use experimental 'signatures';
+use experimental 'lexical_subs';
+
+#
+# Hardcoded instead of parsing the input.
+#
+my $ELVES   =   462;
+my $MARBLES = 71938;
+
+my %points; # Points scored by each elf.
+my $circle = [0];  # Invariant: the current marble is the one on position 0.
+
+sub rotate_cw ($circle, $amount = 1) {
+    $amount  %= @$circle;
+    my @chunk = splice @$circle, 0, $amount;
+    push @$circle => @chunk;
+}
+
+sub rotate_ccw ($circle, $amount = 1) {
+    $amount  %= @$circle;
+    my @chunk = splice @$circle, -$amount, $amount;
+    unshift @$circle => @chunk;
+}
+
+my $elf = 0;
+foreach my $marble (1 .. $MARBLES * 100) {
+    #
+    # Next elf. Elves start numbering by 1 (although that doesn't
+    # really matter for the given challenge.
+    #
+    $elf %= $ELVES;
+    $elf ++;
+
+    if ($marble % 23) {
+        #
+        # "Normal" case: Rotate CW twice, and add marble.
+        #
+        rotate_cw ($circle, 2);
+        splice @$circle, 0, 0, $marble;
+    }
+    else {
+        #
+        # Special case when marble number is a multiple of 23.
+        #
+        # Rotate 7 CCW, and remove that marble. No marble will
+        # be added. Score points (not placed marble and marble removed).
+        #
+        rotate_ccw ($circle, 7);
+        my $removed = shift @$circle;
+        $points {$elf} += $marble + $removed;
+    }
+    say "Part 1: ", max values %points if $marble == $MARBLES;
+}
+
+say "Part 2: ", max values %points;
+
+
+__END__
