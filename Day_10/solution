@@ -1,0 +1,76 @@
+#!/opt/perl/bin/perl
+
+use 5.026;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+use List::Util qw [min max];
+
+use experimental 'signatures';
+
+my $X  = 0;
+my $Y  = 1;
+my $dx = 2;
+my $dy = 3;
+
+my $input = "input";
+open my $fh, "<", $input;
+my @points;
+while (<$fh>) {
+    /^position=<\s*(?<X>-?\d+), \s+ (?<Y>(?&X))> \s+
+      velocity=<\s*(?<dx>(?&X)), \s* (?<dy>(?&X))>/xa
+      or die "Failed to parse $_";
+
+    push @points => [@+ {qw [X Y dx dy]}];
+}
+
+my ($min_Y, $max_Y, $Y_diff);
+
+$min_Y  = min map {$$_ [$Y]} @points;
+$max_Y  = max map {$$_ [$Y]} @points;
+$Y_diff = $max_Y - $min_Y;
+
+
+#
+# Iterate over the seconds. For each iterations, we calculate the
+# new position, and track the min/max Y position. If it increases,
+# we iterate with the new position. Else, the old position is the
+# position we want, and we terminate the loop.
+#
+my $iterations;
+while (1) {
+    my @new_points = map {[$$_ [$X] + $$_ [$dx],
+                           $$_ [$Y] + $$_ [$dy],
+                           $$_ [$dx], $$_ [$dy]]} @points;
+    my $new_min_Y  = min map {$$_ [$Y]} @new_points;
+    my $new_max_Y  = max map {$$_ [$Y]} @new_points;
+    my $new_Y_diff = $new_max_Y - $new_min_Y;
+    last if $new_Y_diff > $Y_diff;
+    @points = @new_points;
+    $Y_diff = $new_Y_diff;
+    $iterations ++;
+}
+
+my %points;
+foreach my $point (@points) {
+    $points {$$point [$X]} {$$point [$Y]} = "#";
+}
+
+   $min_Y  = min map {$$_ [$Y]} @points;
+   $max_Y  = max map {$$_ [$Y]} @points;
+my $min_X  = min map {$$_ [$X]} @points;
+my $max_X  = max map {$$_ [$X]} @points;
+
+say "Part 1: ";
+
+foreach my $y ($min_Y .. $max_Y) {
+    foreach my $x ($min_X .. $max_X) {
+        printf $points {$x} {$y} // ".";
+    }
+    print "\n";
+}
+
+say "Part 2: ", $iterations;
+
+__END__
