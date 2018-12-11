@@ -53,9 +53,9 @@ Here are some more example power levels:
   - Fuel cell at `217,196`, grid serial number 39: power level  0.
   - Fuel cell at `101,153`, grid serial number 71: power level  4.
 
-Your goal is to find the 3x3 square which has the largest total
-power. The square must be entirely within the 300x300 grid. Identify
-this square using the X,Y coordinate of its top-left fuel cell. For
+Your goal is to find the `3x3` square which has the largest total
+power. The square must be entirely within the `300x300` grid. Identify
+this square using the `X,Y` coordinate of its top-left fuel cell. For
 example:
 
 For grid serial number 18, the largest total `3x3` square has a
