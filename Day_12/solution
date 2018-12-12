@@ -1,0 +1,76 @@
+#!/opt/perl/bin/perl
+
+use 5.026;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+
+use experimental 'signatures';
+
+my $GENERATIONS = 20;
+
+my $input = "input";
+open my $fh, "<", $input or die "open: $!";
+
+#
+# Read initial state
+#
+my $state = <$fh> =~ s/[^.#]+//gr;
+
+#
+# Skip blank line
+#
+<$fh>;
+
+#
+# Read transition table
+#
+my %transition;
+while (<$fh>) {
+    /^([.#]{5}) \s+ => \s+ ([#.])/x or die "Failed to parse $_";
+    $transition {$1} = $2;
+}
+
+
+my $first_pot = 0;  # Keep track which number the left-most pot
+                    # we are tracking. This may, or may not,
+                    # contain a plant.
+foreach my $generation (1 .. $GENERATIONS) {
+    #
+    # First, pad the state with 4 empty pods at the beginning
+    # and end. That way, we can just simple get all substrings
+    # of lenght 5. Note, this changes the value of $first_pot.
+    #
+    $state = "....$state....";
+    $first_pot -= 4;
+
+    #
+    # Grab all 5 substring substrings from $state, look up
+    # the replacement, and substitute. Note that we stop
+    # tracking what is in the first two pots.
+    #
+    my $new_string = join "" => map {$transition {$_} || "."}
+       $state =~ /(?=(.....))/g;
+    $first_pot += 2;
+
+    #
+    # Remove any leading/trailing empty pots. Removing leading pots
+    # causes $first_pot to change.
+    #
+    if ($new_string =~ s/^([.]+)//g) {
+        $first_pot += length $1;
+    }
+    $new_string =~ s/[.]+$//g;
+    $state = $new_string;
+}
+
+my $count = 0;
+for (my $i = 0; $i < length $state; $i ++) {
+    my $pot = substr $state, $i, 1;
+    next if $pot ne '#';
+    $count += $i + $first_pot;
+}
+say "Part1: $count";
+
+__END__
