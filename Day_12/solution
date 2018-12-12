@@ -8,7 +8,8 @@ no  warnings 'syntax';
 
 use experimental 'signatures';
 
-my $GENERATIONS = 20;
+my $GENERATIONS_1 =             20;
+my $GENERATIONS_2 = 50_000_000_000;
 
 my $input = "input";
 open my $fh, "<", $input or die "open: $!";
@@ -32,45 +33,63 @@ while (<$fh>) {
     $transition {$1} = $2;
 }
 
+sub count ($state, $first_pot) {
+    my $count = 0;
+    for (my $i = 0; $i < length $state; $i ++) {
+        my $pot = substr $state, $i, 1;
+        next if $pot ne '#';
+        $count += $i + $first_pot;
+    }
+    return $count;
+}
 
 my $first_pot = 0;  # Keep track which number the left-most pot
                     # we are tracking. This may, or may not,
                     # contain a plant.
-foreach my $generation (1 .. $GENERATIONS) {
+my $generation = 0;
+while (1) {
+    $generation ++;
     #
-    # First, pad the state with 4 empty pods at the beginning
-    # and end. That way, we can just simple get all substrings
-    # of lenght 5. Note, this changes the value of $first_pot.
+    # Pad the state with 4 empty pots at the beginning and end.
+    # Then grap all 5 length substrings from $state, look up
+    # the replacement, and substitute. We moved two pots to the
+    # left due to the padding.
     #
-    $state = "....$state....";
-    $first_pot -= 4;
-
-    #
-    # Grab all 5 substring substrings from $state, look up
-    # the replacement, and substitute. Note that we stop
-    # tracking what is in the first two pots.
-    #
-    my $new_string = join "" => map {$transition {$_} || "."}
-       $state =~ /(?=(.....))/g;
-    $first_pot += 2;
+    my $new_state = join "" => map {$transition {$_} || "."}
+       "....$state...." =~ /(?=(.....))/g;
+    my $speed = -2;
 
     #
     # Remove any leading/trailing empty pots. Removing leading pots
     # causes $first_pot to change.
     #
-    if ($new_string =~ s/^([.]+)//g) {
-        $first_pot += length $1;
+    if ($new_state =~ s/^([.]+)//g) {
+        $speed += length $1;
     }
-    $new_string =~ s/[.]+$//g;
-    $state = $new_string;
+    $new_state =~ s/[.]+$//g;
+
+    if ($state eq $new_state) {
+        #
+        # We're now in a "steady" state; that is, the pattern
+        # stays stable, although it may still move.
+        #
+        
+        #
+        # So, we can now calculate what the first pot is in
+        # the final generation.
+        #
+        my $fp = $first_pot + $speed * ($GENERATIONS_2 - $generation + 1);
+        say "Part 2: ", count ($state, $fp);
+        last;
+    }
+
+    $state      = $new_state;
+    $first_pot += $speed;
+
+    if ($generation == $GENERATIONS_1) {
+        say "Part1: ", count ($state, $first_pot);
+    }
 }
 
-my $count = 0;
-for (my $i = 0; $i < length $state; $i ++) {
-    my $pot = substr $state, $i, 1;
-    next if $pot ne '#';
-    $count += $i + $first_pot;
-}
-say "Part1: $count";
 
 __END__
